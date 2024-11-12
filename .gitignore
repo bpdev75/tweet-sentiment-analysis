@@ -1,0 +1,9 @@
+.vscode/
+data/
+mlartifacts/
+mlruns/
+notebooks/
+models/BERT/
+src/api/BERT/
+tokenizer/BERT/
+models/BERTClassifier.py
