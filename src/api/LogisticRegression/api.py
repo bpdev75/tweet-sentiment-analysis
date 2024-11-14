@@ -2,6 +2,8 @@
 from src.models.LogisticRegressionClassifier import LogisticRegressionClassifier
 from fastapi import FastAPI
 
+API_VERSION = "1.0"
+
 app = FastAPI()
 
 # Chargement du model
@@ -13,4 +15,4 @@ def predict_tweet_sentiment(tweet: str):
 
     # Obtenir la prédiction (classe prédite)
     predicted_class = y_pred[0]
-    return {"predicted class": "Positif" if predicted_class else "Négatif"}
+    return {"predicted class": "Positif" if predicted_class else "Négatif", "API version": API_VERSION}
