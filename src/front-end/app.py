@@ -1,8 +1,11 @@
 import streamlit as st
 import requests
 import urllib.parse
+from src.api.monitoring import Monitoring
 
 AZURE_API_URL = "https://tweet-sentiment-api-brcngbash4eqafhr.westeurope-01.azurewebsites.net/predict"  # URL de l'API déployée sur Azure
+monitoring = Monitoring()
+
 
 # Fonction pour envoyer une requête au modèle sur Azure
 def get_sentiment(text):
@@ -30,5 +33,14 @@ if st.button('Predict'):
         # Appeler l'API et obtenir le sentiment
         sentiment = get_sentiment(tweet_text)
         st.write(f"Sentiment prédit : {sentiment}")
+
+        # Ajouter les boutons de feedback
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button('👍 Correct'):
+                monitoring.updateAccuracy(tweet_text, sentiment, True)
+        with col2:
+            if st.button('👎 Incorrect'):
+                monitoring.updateAccuracy(tweet_text, sentiment, False)
     else:
         st.warning("Veuillez entrer un tweet avant de prédire.")

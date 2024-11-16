@@ -5,5 +5,5 @@ mlruns/
 notebooks/
 models/BERT/
 src/api/BERT/
+src/models/BERTClassifier.py
 tokenizer/BERT/
-models/BERTClassifier.py
