@@ -46,10 +46,9 @@ class Monitoring:
             self.accuracy_measure,
             LastValueAggregation(),
         )
-        monitor_stats = stats.Stats()
-        monitor_stats.view_manager.register_exporter(exporter)
-        monitor_stats.view_manager.register_view(accuracy_view)
-        self.measure_map = monitor_stats.stats_recorder.new_measurement_map()
+        stats.stats.view_manager.register_exporter(exporter)
+        stats.stats.view_manager.register_view(accuracy_view)
+        self.measure_map = stats.stats.stats_recorder.new_measurement_map()
 
     def trace_feedback(self, tweet: str, predicted_sentiment: str, is_correct: bool):
         self.logger.info(
