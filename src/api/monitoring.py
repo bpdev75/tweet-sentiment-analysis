@@ -7,8 +7,8 @@ from opencensus.trace.tracer import Tracer
 from opencensus.trace import config_integration
 from opencensus.ext.azure.metrics_exporter import MetricsExporter
 from opencensus.metrics.transport import get_exporter_thread
-from opencensus.stats import stats as stats_module
-from opencensus.stats import view as view_module
+from opencensus.stats import stats
+from opencensus.stats import view
 from opencensus.stats.aggregation import LastValueAggregation
 from opencensus.stats.measure import MeasureFloat
 from opencensus.tags import TagMap
@@ -36,19 +36,20 @@ class Monitoring:
 
         # Configuration Azure
         exporter = MetricsExporter(connection_string=f"InstrumentationKey={instrumentationKey}")
-        self.stats = stats_module.stats
-        self.stats.view_manager.register_exporter(exporter)
-
+        
         # Declare the accuracy measure
         self.accuracy_measure = MeasureFloat("accuracy", "Ratio de tweets correctement prédits", "ratio")
-        accuracy_view = view_module.View(
+        accuracy_view = view.View(
             "accuracy_view",
             "Accuracy des prédictions",
             [],
             self.accuracy_measure,
             LastValueAggregation(),
         )
-        self.stats.view_manager.register_view(accuracy_view)
+        monitor_stats = stats.Stats()
+        monitor_stats.view_manager.register_exporter(exporter)
+        monitor_stats.view_manager.register_view(accuracy_view)
+        self.measure_map = monitor_stats.stats_recorder.new_measurement_map()
 
     def trace_feedback(self, tweet: str, predicted_sentiment: str, is_correct: bool):
         self.logger.info(
@@ -68,10 +69,9 @@ class Monitoring:
         # Calculate accuracy
         accuracy = self.correct_predictions / self.total_predictions
         
-        # Create a MeasureMap and record the accuracy
-        measure_map = self.stats.measure_map()
-        measure_map.put(self.accuracy_measure, accuracy)
-        measure_map.record(TagMap())
+        # Record the accuracy
+        self.measure_map.measure_float_put(self.accuracy_measure, accuracy)
+        self.measure_map.record(TagMap())
 
     def logError(self, error):
         self.logger.error(error, exc_info=True)
