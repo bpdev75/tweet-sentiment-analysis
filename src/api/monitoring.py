@@ -67,8 +67,11 @@ class Monitoring:
 
         # Calculate accuracy
         accuracy = self.correct_predictions / self.total_predictions
-        self.stats.measure_map.measure_float.put(self.accuracy_measure, accuracy)
-        self.stats.measure_map.record(TagMap())
+        
+        # Create a MeasureMap and record the accuracy
+        measure_map = self.stats.measure_map()
+        measure_map.put(self.accuracy_measure, accuracy)
+        measure_map.record(TagMap())
 
     def logError(self, error):
         self.logger.error(error, exc_info=True)
