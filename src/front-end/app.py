@@ -1,18 +1,17 @@
 import streamlit as st
 import requests
 import urllib.parse
-from src.api.monitoring import Monitoring
 
-AZURE_API_URL = "https://tweet-sentiment-api-brcngbash4eqafhr.westeurope-01.azurewebsites.net/predict"  # URL de l'API déployée sur Azure
-monitoring = Monitoring()
-
+AZURE_BASE_URL = "https://tweet-sentiment-api-brcngbash4eqafhr.westeurope-01.azurewebsites.net" # URL de l'API déployée sur Azure
+AZURE_PREDICT_URL = f"{AZURE_BASE_URL}/predict"
+AZURE_FEEDBACK_URL = f"{AZURE_BASE_URL}/feedack"  
 
 # Fonction pour envoyer une requête au modèle sur Azure
 def get_sentiment(text):
     # Encoder le texte pour qu'il soit sécurisé pour l'URL
     query = {"tweet": text}
     encoded_query = urllib.parse.urlencode(query)  # encode le paramètre pour l'URL
-    url_with_query = f"{AZURE_API_URL}?{encoded_query}"
+    url_with_query = f"{AZURE_PREDICT_URL}?{encoded_query}"
     response = requests.get(url_with_query)
 
     if response.status_code == 200:
@@ -20,6 +19,18 @@ def get_sentiment(text):
         return result.get("predicted class", "Erreur lors de la prédiction")
     else:
         return f"Erreur de connexion à l'API: {response.status_code} - {response.json()}"
+
+def send_feedback(tweet, predicted_sentiment, feedback):
+    data = {
+        "tweet": tweet,
+        "predicted_sentiment": predicted_sentiment,
+        "feedback": feedback,
+    }
+    response = requests.post(AZURE_FEEDBACK_URL, json=data)
+    if response.status_code == 200:
+        st.success("Feedback envoyé avec succès !")
+    else:
+        st.error(f"Erreur lors de l'envoi du feedback : {response.text}")
 
 # Interface Streamlit
 st.title('Analyse de Sentiment des Tweets')
@@ -35,12 +46,12 @@ if st.button('Predict'):
         st.write(f"Sentiment prédit : {sentiment}")
 
         # Ajouter les boutons de feedback
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns([1, 1])
         with col1:
             if st.button('👍 Correct'):
-                monitoring.updateAccuracy(tweet_text, sentiment, True)
+                send_feedback(tweet_text, sentiment, True)
         with col2:
             if st.button('👎 Incorrect'):
-                monitoring.updateAccuracy(tweet_text, sentiment, False)
+                send_feedback(tweet_text, sentiment, False)
     else:
         st.warning("Veuillez entrer un tweet avant de prédire.")
