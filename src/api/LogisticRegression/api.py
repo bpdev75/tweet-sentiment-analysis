@@ -2,6 +2,7 @@
 from src.models.LogisticRegressionClassifier import LogisticRegressionClassifier
 from src.api.monitoring import Monitoring
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 API_VERSION = "1.1"
@@ -20,6 +21,17 @@ class Feedback(BaseModel):
 # Fonction de dépendance pour initialiser Monitoring
 def get_monitoring():
     return Monitoring()
+
+@app.exception_handler(Exception)
+async def validation_exception_handler(request, exc):
+    # Initialisation manuelle de Monitoring ici (car Depends() ne fonctionne pas dans un gestionnaire global)
+    monitoring = Monitoring()
+
+    monitoring.logError(str(exc))
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal Server Error", "error": str(exc)}
+    )
 
 @app.get("/predict")
 def predict_tweet_sentiment(tweet: str):
