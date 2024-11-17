@@ -39,5 +39,11 @@ async def collect_feedback(feedback: Feedback, monitoring: Monitoring = Depends(
         monitoring.trace_feedback(feedback.tweet, feedback.predicted_sentiment, feedback.feedback)
         return {"message": "Feedback logged successfully"}
     except Exception as e:
-        monitoring.logError("Error logging feedback")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        monitoring.logError(f"Error logging feedback: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Internal server error",
+                "exception": str(e)
+            }
+        )
