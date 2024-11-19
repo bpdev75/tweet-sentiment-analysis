@@ -56,7 +56,7 @@ if 'predict_clicked' in st.session_state and st.session_state.predict_clicked:
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button('👍 Correct'):
-            send_feedback(tweet_text, sentiment, True)
+            st.info('Merci pour votre feedback', icon="ℹ️")
     with col2:
         if st.button('👎 Incorrect'):
             send_feedback(tweet_text, sentiment, False)
