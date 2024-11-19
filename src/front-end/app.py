@@ -41,16 +41,17 @@ tweet_text = st.text_area("Entrez votre tweet ici:")
 # Bouton "Predict"
 if st.button('Predict'):
     if tweet_text:
+        # Appeler l'API et obtenir le sentiment
+        sentiment = get_sentiment(tweet_text)
+
         # Enregistrer l'état du bouton "Predict" dans st.session_state
-        st.session_state.predict_clicked = True
+        st.session_state.predicted_sentiment = sentiment
     else:
         st.warning("Veuillez entrer un tweet avant de prédire.")
 
 # Afficher les boutons "Correct" et "Incorrect" seulement après avoir cliqué sur "Predict"
-if 'predict_clicked' in st.session_state and st.session_state.predict_clicked:
-    # Appeler l'API et obtenir le sentiment
-    sentiment = get_sentiment(tweet_text)
-    st.write(f"Sentiment prédit : {sentiment}")
+if 'predicted_sentiment' in st.session_state:
+    st.write(f"Sentiment prédit : {st.session_state.predicted_sentiment}")
 
     # Ajouter les boutons de feedback
     col1, col2 = st.columns([1, 1])
@@ -59,4 +60,4 @@ if 'predict_clicked' in st.session_state and st.session_state.predict_clicked:
             st.info('Merci pour votre feedback', icon="ℹ️")
     with col2:
         if st.button('👎 Incorrect'):
-            send_feedback(tweet_text, sentiment, False)
+            send_feedback(tweet_text, st.session_state.predicted_sentiment, False)
