@@ -61,6 +61,10 @@ class Monitoring:
                 }
             }
         )
+        with self.tracer.span(name="Process Tweet") as span:
+            span.add_attribute("tweet_length", len(tweet))
+            span.add_attribute("predicted_sentiment", predicted_sentiment)
+
         if is_correct:
             self.correct_predictions += 1
         self.total_predictions += 1
